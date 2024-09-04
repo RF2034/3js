@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.167.0/build/three.module.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+
+      // サイズを指定
+      const width = 960;
+      const height = 540;
+
+      // レンダラーを作成
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.querySelector("#myCanvas"),
+      });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(width, height);
+
+      // シーンを作成
+      const scene = new THREE.Scene();
+
+      // カメラを作成
+      const camera = new THREE.PerspectiveCamera(45, width / height);
+      let rot = 0; // 角度
+      let mouseX = 0; // マウス座標
+
+      // マウス座標はマウスが動いた時のみ取得できる
+      document.addEventListener("mousemove", (event) => {
+        mouseX = event.pageX;
+      });
+
+      const geometry = new THREE.TorusGeometry(300, 100, 16, 100);
+      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const torus = new THREE.Mesh(geometry, material);
+      scene.add(torus);
+      // 平行光源
+      const directionalLight = new THREE.DirectionalLight(0xffffff);
+      directionalLight.position.set(0, 1, 1);
+      // シーンに追加
+      scene.add(directionalLight);
+
+      tick();
+
+      // 毎フレーム時に実行されるループイベントです
+      tick();
+
+      // 毎フレーム時に実行されるループイベントです
+      function tick() {
+        // マウスの位置に応じて角度を設定
+        // マウスのX座標がステージの幅の何%の位置にあるか調べてそれを360度で乗算する
+        const targetRot = (mouseX / window.innerWidth) * 360;
+        // イージングの公式を用いて滑らかにする
+        // 値 += (目標値 - 現在の値) * 減速値
+        rot += (targetRot - rot) * 0.02;
+
+        // ラジアンに変換する
+        const radian = (rot * Math.PI) / 180;
+        // 角度に応じてカメラの位置を設定
+        camera.position.x = 1000 * Math.sin(radian);
+        camera.position.z = 1000 * Math.cos(radian);
+        // 原点方向を見つめる
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        // レンダリング
+        renderer.render(scene, camera);
+
+        requestAnimationFrame(tick);
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+  </body>
+</html>
